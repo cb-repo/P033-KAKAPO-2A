@@ -16,9 +16,9 @@ Developed, assembled, and tested in [Christchurch, New Zealand](https://www.goog
 
 - Dual Bi-Directional DC-motor outputs.
 - Dual Servo/ESC signal outputs.
-- High power input for XT30 connector or soldered wire.
+- High-power input that accepts XT30 connector or soldered wire.
 - Anti-vibration power switch.
-- Switched battery output for XT30 or soldered wire. 
+- Switched battery output that accepts XT30 or soldered wire. 
 - Power LED aligned with power switch access port.
 - Status LED's to indicate run mode, fault and calibration.
 - Under-voltage and over-temperature protections.
@@ -32,42 +32,43 @@ Developed, assembled, and tested in [Christchurch, New Zealand](https://www.goog
 
 - **Dimensions:** 39x19x4mm *bare pin-header height* 
 - **Weight:** 6g *excluding wires*
-- **Voltage Input:** 6.0-26.1 (2-6S LiHV)
-- **Motor Current Output - Continuious:** 2A  
-- **Motor Current Output - Burst:** 3.6A
-- **Radio Signal Input:** Servo PWM, CRSF
+- **Voltage Input:** 2-4S LiHV (6-17.4V)
+- **Motor Output - Continuious:** 2A  
+- **Motor Output - Burst:** 3.6A
+- **Radio Input:** Servo PWM, CRSF
 - **Servo/ESC Signal Output:** Servo PWM
 - **BEC Output:** 5V, 1A. Designed to power your radio and low-power outputs on the servo connector
 - **Power Switch Thread:** M3 (2mm Hex Key)
 - **Mounting Thread:** M3
 
 ## USAGE
-### Product Layout
+### Product Layout - Top
 
-<img src="assets/KAKAPO_AnnotatedFront.JPG" width="300">
+<img src="assets/KAKAPO_Drawing.png" width="300">
 
 ### Product Mounting 
 
-Mounting using the two provided M3 threaded bosses in each corner.
+The KAKAPO provides two M3 threaded bosses in each corner to simplify mounting. Shown using an example mount plate below:
 
-<img src="assets/KAKAPO_DrawingLayout.JPG" width="300"> <img src="assets/KAKAPO_MountExample.JPG" width="300">
+ <img src="assets/KAKAPO_MountExample.JPG" width="300">
 
 ### Status LEDs
 
-There are 3 LEDs on the KAKAPO (1x red, 2x blue). The red LED is in the center and a blue LEDs are on each edge beside the motor outputs.
- - **Normal Operation**
-    - **No Power** Red: OFF, 2x Blue: OFF
-    - **Standby** Red: ON, 2x Blue: OFF
-    - **Driving** Red: ON, 2x Blue: ON. Each blue LED will illuminate when their corresponsing motor output is being driven.
- - **Fault Conditions**
-    - **Signal-Input** Red: ON, 2x Blue: ALTERNATING FLASH (1Hz)
-    - **Under-Voltage** Red: ON, 2x Blue: FLASH (1Hz)
-    - **Over-Temperature** Red: ON, 2x Blue: FAST FLASH (5Hz)
- - **Calibration** Red: ON, 2x Blue: PATTERN. (See Calibration section for specific LED patterns)  
+There are 3 LEDs on the KAKAPO (1x red, 2x blue). The red LED is in the center and a blue LEDs are on each edge beside the motor outputs.See table below to detail LED behaviour:
 
+| State                     | Red LED   | Blue LEDs | | 
+| :---:                     | :---:     | :---:     | :---  
+| No Power                  | OFF       | OFF       |  
+| Standby                   | ON        | OFF       |         
+| Driving                   | ON        | ON        | Each blue LED will immunimate when their corresponding input is being driven. 
+| Fault Signal-Input        | ON        | ALTERNATING FLASH       | 1Hz  
+| Fault Under-Voltage       | ON        | FLASH         | 1Hz
+| Fault Over-Temperature    | ON        | FAST FLASH    | 5Hz 
+| Calibration               | ON        | PATTERN       | See Calibration section for specific LED patterns
+   
 ### Prototcol Auto-Detection
 
-Each time the KAKAPO powers on, it attempts to identify the connected radio protocol. It first tries the last known protocol, then cycles through all supported protocols until a valid signal is found. Once detected, the protocol is saved and the system immediately enters normal operation. If no valid signal is detected, KAKAPO enters a signal-input fault state.
+Each time the KAKAPO powers on, it runs an auto-detect sequence to identify the connected radio protocol. It first tries the last known protocol, then cycles through all supported protocols until a valid signal is found. Once detected, the protocol is saved and the system immediately enters normal operation. If no valid signal is detected, KAKAPO enters a signal-input fault state.
 
 Note: Some receivers take a few seconds to link with the transmitter when powered on. In this case the KAKAPO will enter a signal-input fault state during this time. The fault state will clear automatically once the receiver connects and a valid signal is detected.
 
@@ -79,11 +80,11 @@ The monitored faults, listed from highest to lowest priority, are:
 
 1. **Over-Temperature:** If an over-temperature condition occurs, all outputs shut down immediately and remain off until the temperature recovers to a safe level. KAKAPO includes multiple temperature sensors:
     - The primary sensor monitors the board temperature and triggers a fault at 100°C.
-    - A backuop sensor in each motor driver that trips at 150°C.
+    - A backup sensor in each motor driver that trips at 150°C.
 
-2. **Under-Voltage:** An under-voltage faul is triggered if your battery voltage drops below 3.0V per cell. This is also a critical fault that causes immediate shutdown of all outputs until voltage recovers.
+2. **Under-Voltage:** An under-voltage fault is triggered if your battery voltage drops below 3.0V per cell. This is also a critical fault that causes immediate shutdown of all outputs until voltage recovery.
 
-    Important note: When KAKAPO powers on, it automatically detects how many cells your battery has. It assumes the battery is mostly charged when doing this, so if you start up with a low battery, it might detect the wrong cell count and set the undervoltage threshold too low. To avoid issues, we recommend powering on with a fully-charged battery.
+    Important note: When KAKAPO powers on, it automatically detects how many cells your battery has. Some battery cell counts have a voltage overlap with adjacent counts, see table below, so the KAKAPO assumes the battery is more charged when powering on. If you start up with a low battery, it might detect the wrong cell count and set the undervoltage threshold too low. To avoid issues, we recommend powering on with a fully-charged battery. 
 
     | Battery Cells | Low Voltage   | High Voltage  | At Risk   | Percentage Overlap |
     | :---:         | :---:         | :---:         | :---:     | :---: |
@@ -95,21 +96,19 @@ The monitored faults, listed from highest to lowest priority, are:
 
 
 3. **Signal-Input:** KAKAPO uses an intelligent failsafe system that monitors each input channel individually. It only triggers a fault if a channel mapped to an output is lost. Here is how it works:
-    1. Only mapped channels matter:
-        - For example, if Channels 1, 2, and 3 are mapped to drive/servo outputs, but Channel 4 is unused, losing Channel 4 won’t trigger a fault.
+    1. Only mapped channels matter.
+        - Example: If Channels 1, 2, and 3 are mapped to drive/servo outputs, but Channel 4 is unused, losing Channel 4 won’t trigger a fault.
     2. Faults are channel specific: 
-        - If only the signal for one servo is lost, just that output stops, everything else keeps running.
-        - In arcade drive mode, if the throttle channel is lost, the motors stop driving forward/backward, but turning and servos still work.
+        - Example: If only the signal for one servo is lost, just that output stops, everything else keeps running.
+        - Example: In arcade drive mode, if the throttle channel is lost, the motors stop driving forward/backward, but turning and servos still work.
     3. The LED will show a signal-input fault whenever one or more mapped channels are lost.
     4. A channel must first be seen (with valid data) before it can be considered "lost":
-        - For example, if a mapped channel was never connected at power on, it's not considered a fault. The fault only occurs if the channel was working and then disappears.
-
+        - If a mapped channel was never connected at power on, it's not considered a fault. The channel must first be connected then disconnected to be considered a fault. 
 
 Note: You should still set the failsafe on the radio reciever to handle a loss of connection between the reciever and transmitter.
 
 ## CALIBRAITON
 
-### Calibration Parameters
 
 The KAKAPO has a number of parameters that are detected during the calibration process. These are:
 
@@ -133,98 +132,108 @@ If at any point the calibration is corrupted, the KAKAPO will roll back to the f
 - **Driving Mode:** Arcade
 - **Motor Braking:** Enable
 - **Motor A:**
-    - Channel: Input 1
+    - Channel: 1
     - Reverse: False
 - **Motor B:**
-    - Channel: Input 2
+    - Channel: 2
     - Reverse: False
 - **Servo Out1:**
     - Enabled: True
-    - Channel: Input 3
+    - Channel: 3
     - Reverse: False
 - **Servo Out2:**
     - Enabled: True
-    - Channel: Input 4
+    - Channel: 4
     - Reverse: False
 
 ### Calibration Procedure
 
-Please read this section in full before initiating calibration for the first time. The process moves quickly once started, but becomes intuitive after your first go.
+Please read this section in full before initiating calibration for the first time. The process moves quickly once started, but becomes intuitive after your first go around.
 
 Calibration settings are only saved once the entire procedure is completed. If you make a mistake, just power cycle the device and start again, nothing is saved until the end. 
 
 1. Preparation
-    - Install the motors in the orientation you want. This allows the system to correctly detect mapping and direction during calibration.
-    - Connect the motors and radio receiver to the KAKAPO. Ensure the receiver is already bound to your transmitter.
-    - Make sure the robot is elevated or safe to move. It will twitch and drive during calibration.
+    - Install the motors in the orientation you want in the robot. This allows the system to correctly detect mapping and direction during calibration.
+    - Connect the motors and radio receiver to the KAKAPO. 
+    - Ensure the receiver is bound to your transmitter.
+    - Make sure the robot is elevated or safe to move within a test-box. The robot will twitch the during calibration.
 
 2. Entering Calibraiton Mode
     - Power on the KAKAPO.
-    - Within 10 seconds, wiggle any connected input stick 20 times (must be wiggled to full forward and/or full reverse).
+    - Within 10 seconds, wiggle any connected input stick 20 times (must be wiggled full forward and full reverse).
     - Calibration will only begin if at least two valid input channels are detected and the KAKAPO is not in a fault condition.
-    - The two blue LEDs will pulse 10 times to indicate calibration mode has been entered.
-    - The two blue LEDs will then stay solid on to wait for the user to start the calibratrion.
+    - Both blue LEDs will pulse 10× to confirm entering calibration mode.
+    - While the LEDs are pulsing, the user must stop wiggling the stick and return all inputs to their neutral positions. This is what the KAKAPO will consider CENTER for the rest of the calibration.
+    - Once the LEDs have finished pulsing, they will remain solid and wait for the user to start the calibratrion.
 
 3. Drive Mode Detection.
     
-    This "Simon-says" process detects drive mode (Tank or Arcade), input mapping, and input inversion by moving the motors and getting the user to input that back.     The user must then input that motion back into the remote. eg:
-        - Robot twitches forward: Tank drive, simualtaneously push both sticks forward. Arcarde drive, push one stick forward.
-        - Robot twitches left: Tank drive, simualtaneously push left stick back and right forward. Arade drive, push one stick left
+    This stage uses a "Simon-says" process that twitches the motors (moves the robot in a direction) and getting the user to input that motion back on the remote. For example:
+    - Robot twitches forward: Simualtaneously push both sticks forward for tank drive, or push one stick forward for arcade.
+    - Robot twitches left: Simualtaneously push left stick back and right forward for tank, or push one stick left for arcade.
 
-    The simon-says process is:
-    - The blue LEDs will still be solid from step 2, move any stick fully to MAX and back to CENTER to begin and both LED will turn off.
-    - The motor movement tests has the process: 
+    The steps for this stage are:
+    - Both LEDs are ON from step 2.
+    - Move any stick to MAX and back to CENTER to start.
+    - The Simon-says process is: 
         1. Both LEDs turn OFF.
-        2. Motor twitch in a direction (eg fwd, rvs, left, right).
-        3. One blue LED turns ON.
-        4. Match that motion using your radio input (eg: robot moved fwd, push stick fwd)
-        5. Second LED turns ON when valid input is seen
-        6. Return stick(s) to center
-        7. Both LEDs turn OFF and flash 3 times to confirm success
-    - The process repeats for a second motion test.
+        2. Robot twitch in a direction.
+        3. One LED turns ON.
+        4. Match that robot motion on your radio using the desired driving style.
+        5. Second LED turns ON.
+        6. Return stick(s) to CENTER.
+        7. Both LEDs turn OFF.
+        8. Both LEDs pulse 3× to confirm completion of current step.
+    - The Simon-says process repeats for a second direction.
 
 4. Motor Braking Detection
 
-    After drive inputs are confirmed, KAKAPO tests whether you want motor braking enabled when sticks return to zero.
+    After drive mode is confirmed, the KAKAPO immediatley enters the motor braking detection stage:
 
-    - Motors will briefly twitch, and one blue LED turns on
-    - To enable braking, flick any input stick (doesn’t matter which) within 3 seconds.
-        - The second LED will light up
-        - Motors will twitch again
-        - Both LEDs will pulse 3× to confirm braking is enabled
-    - To disable braking, do nothing
-        - Only one LED remains on
-        - After timeout, both LEDs will pulse 3× and proceed
+    - Both LEDs turn OFF.
+    - Motors very quicly twitch.
+    - One LED turns ON.
+    - To enable braking:
+        - Within 5 seconds, move any stick to MAX.
+        - Second LED turns ON.
+        - Return stick to CENTER.
+        - Both LEDs turn OFF.
+        - Motors will quickly twitch again to confirm detection.
+    - To disable braking:
+        - Do nothing.
+        - After a timeout of 5 seconds it will automatically proceeed.
+        - Unlike braking enable, the motors will not twitch again.
+    - Both LEDs pulse 3× to confirm completion of current step.
 
-5. Servo Output Mapping
+5. ESC/Servo Output Mapping
 
-    If at least 3 valid channels are detected, KAKAPO proceeds to map the servo outputs. If only two channels are connected, this step is skipped.
+    After motor braking is confirmed, the KAKAPO immediatly enters the ESC/servo ouput mapping stage.
 
-    For each of the two servo outputs, you will:
+    To continue with this stage, at least 3 valid radio channels must be connected. 
+    - For safety the KAKAPO doesnt allow the drive input channels to be mapped to the ESC/Servo outputs. So if only two channels are connected, this step is skipped and the outputs are disabled until the next calibration.
 
-    1. See one blue LED turn on
-    2. Push the stick you want to assign (and the direction)
-    3. When input is detected, second LED turns on
-    4. Return stick to center
-    5. Both LEDs will pulse 3× to confirm the mapping
+    This stage is very simmilar to the Simon-says detection previously used but here the servo outputs are not driven (for safety of accidentally driving a robot weapon).
+
+    The steps for this stage are:
+    - Both LEDs start OFF.
+    - One LED turns ON.
+    - Push the stick (and in the direction) you want assigned to ESC/Servo Output 1.
+    - Second LED turns ON.
+    - Return stick to CENTER.
+    - Both LEDs turn OFF.
+    - Both LEDs pulse 3× to confirm completion of current step.
+    - The process repeats for ESC/Servo Output 2. 
 
     You can assign:
-    - Both servos to the same input
-    - Each servo to different inputs
-    - Reverse one or both by pushing the stick in the opposite direction
+    - Each output to different inputs.
+    - Both outputs to the same input, in the same or opposite directions.
+    - Disable either or both output(s) by not pushing a stick: Allowing it to timeout simmilar to motor braking detection.
+
 
  6. Calibration Complete
-     - Both blue LEDs will pulse 10 times to indicate a successfull calibration.
-     - Once the LED pulses are complete, the KAKAPO immediately enters Run mode using the new calibration.
-     - If the KAKAPO is turned OFF before completing the calibration process, NONE of the new parameters are stored and it will revert to the previous configuraion. 
-
-## COMMON QUESTIONS/ISSUES
-
-1. The outputs are jerky. *Too big of a motor, or servo, battery voltage is too low, wire gague between battery and KAKAPO is tool small*
-2. I cannot get into calibration mode.
-3. The servo output is not generating a signal
-4. The current protocol list is short. Are you adding more? Yes *(active development: PPM, SBUS, IBUS)* Future development:DShot (300/600), PWM, OneShot, Multishot
-5. Id like to power a bigger servo from the output. *We are doing what we can to implement a larger 5V/8.4V regulator for the next version of the KAKAPO. We are up against size issues but are doing what we can*
+     - Both blue LEDs pulse 10× to indicate completion of calibration and the parameters are saved.  
+     - The KAKAPO immediately enters Normal Operation using the new calibration settings.
+     - If a weapon ESC is connected to either output during this process, please take extra caution. Although the outputs are disabled during this process, they are re-enabled when exiting the calibration and it could startup if you are not careful: This will depend on your radio input positions and the OFF settings for said ESC.
 
 ## DISCLIAMER
 
