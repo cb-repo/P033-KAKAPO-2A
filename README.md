@@ -56,14 +56,14 @@ The KAKAPO provides two M3 threaded bosses in each corner to simplify mounting. 
 
 There are 3 LEDs on the KAKAPO (1x red, 2x blue). The red LED is in the center and a blue LEDs are on each edge beside the motor outputs.See table below to detail LED behaviour:
 
-| State                     | Red LED   | Blue LEDs | | 
-| :---:                     | :---:     | :---:     | :---  
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br> State| Red <br> LED   | Blue <br> LEDs | | 
+| :---:                     | :---:     | :---:     | :--- 
 | No Power                  | OFF       | OFF       |  
 | Standby                   | ON        | OFF       |         
 | Driving                   | ON        | ON        | Each blue LED will immunimate when their corresponding input is being driven. 
-| Fault Signal-Input        | ON        | ALTERNATING FLASH       | 1Hz  
-| Fault Under-Voltage       | ON        | FLASH         | 1Hz
-| Fault Over-Temperature    | ON        | FAST FLASH    | 5Hz 
+| Fault <br> Signal-Input        | ON        | ALTERNATING FLASH       | 1Hz  
+| Fault <br> Under-Voltage       | ON        | FLASH         | 1Hz
+| Fault <br> Over-Temp    | ON        | FAST FLASH    | 5Hz 
 | Calibration               | ON        | PATTERN       | See Calibration section for specific LED patterns
    
 ### Prototcol Auto-Detection
@@ -74,28 +74,21 @@ Note: Some receivers take a few seconds to link with the transmitter when powere
 
 ### Fault Conditions
 
-KAKAPO continuously monitors for several fault conditions during operation. Each fault has a severity level, and if multiple faults occur at once, the most critical one takes control. Once resolved, the system steps down through the remaining faults until everything is cleared and normal operation resumes.
+KAKAPO continuously monitors for several fault conditions during operation. The monitored faults, listed from highest to lowest priority, are:
 
-The monitored faults, listed from highest to lowest priority, are:
+1. **Over-Temperature:** An over-temperature fault occurs when the primary sense circuit reaches 100°C. There is also a backup sensor for each motor output that trips at 150°C.
 
-1. **Over-Temperature:** If an over-temperature condition occurs, all outputs shut down immediately and remain off until the temperature recovers to a safe level. KAKAPO includes multiple temperature sensors:
-    - The primary sensor monitors the board temperature and triggers a fault at 100°C.
-    - A backup sensor in each motor driver that trips at 150°C.
+2. **Under-Voltage:** An under-voltage fault occurs if the battery voltage falls below 3.0V (per cell).
 
-2. **Under-Voltage:** An under-voltage fault is triggered if your battery voltage drops below 3.0V per cell. This is also a critical fault that causes immediate shutdown of all outputs until voltage recovery.
-
-    Important note: When KAKAPO powers on, it automatically detects how many cells your battery has. Some battery cell counts have a voltage overlap with adjacent counts, see table below, so the KAKAPO assumes the battery is more charged when powering on. If you start up with a low battery, it might detect the wrong cell count and set the undervoltage threshold too low. To avoid issues, we recommend powering on with a fully-charged battery. 
+    Important note: When KAKAPO powers on, it automatically detects how many cells your battery has to set the appropriate low voltage level. Some battery cell counts have a voltage overlap with adjacent counts, see table below. So, the KAKAPO then assumes the battery is more charged when powering on to solve the overlap. If you start up with a low battery, it might detect and set the undervoltage threshold too low. To avoid issues, we recommend powering on with a fully-charged battery. 
 
     | Battery Cells | Low Voltage   | High Voltage  | At Risk   | Percentage Overlap |
     | :---:         | :---:         | :---:         | :---:     | :---: |
     | 2s            | 6.0V          | 8.70V         | No        | n/a |
     | 3s            | 9.0V          | 13.05V        | No        | n/a |
     | 4s            | 12.0V         | 17.40V        | Yes       | 19.4% |
-    | 5s            | 15.0V         | 21.75V        | Yes       | 35.6% |
-    | 6s            | 18.0V         | 26.1V         | Yes       | 46.3% |
 
-
-3. **Signal-Input:** KAKAPO uses an intelligent failsafe system that monitors each input channel individually. It only triggers a fault if a channel mapped to an output is lost. Here is how it works:
+3. **Signal-Input:** KAKAPO uses an intelligent failsafe system that monitors each input channel individually. It only triggers a fault if a channel mapped to an output is lost. Here's how the failsafe works:
     1. Only mapped channels matter.
         - Example: If Channels 1, 2, and 3 are mapped to drive/servo outputs, but Channel 4 is unused, losing Channel 4 won’t trigger a fault.
     2. Faults are channel specific: 
@@ -105,10 +98,9 @@ The monitored faults, listed from highest to lowest priority, are:
     4. A channel must first be seen (with valid data) before it can be considered "lost":
         - If a mapped channel was never connected at power on, it's not considered a fault. The channel must first be connected then disconnected to be considered a fault. 
 
-Note: You should still set the failsafe on the radio reciever to handle a loss of connection between the reciever and transmitter.
+    *Note: You should still set the failsafe on the radio reciever to handle a loss of connection between the reciever and transmitter.*
 
 ## CALIBRAITON
-
 
 The KAKAPO has a number of parameters that are detected during the calibration process. These are:
 
